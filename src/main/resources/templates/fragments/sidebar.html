@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="sidebar" class="bg-success bg-gradient text-white p-3" style="min-height: 100vh; width: 240px;">
+    <div class="d-flex align-items-center gap-2 mb-4 px-2">
+        <span class="badge rounded-circle bg-white text-success p-2 fs-6">+</span>
+        <span class="fs-4 fw-bold">Farmacia</span>
+    </div>
+    <nav class="nav nav-pills flex-column gap-1">
+        <a th:href="@{/web/categorias}" class="nav-link text-white">Categorías</a>
+        <a th:href="@{/web/presentaciones}" class="nav-link text-white">Presentaciones</a>
+        <a th:href="@{/web/medicamentos}" class="nav-link text-white">Medicamentos</a>
+    </nav>
+</div>
+</body>
+</html>
