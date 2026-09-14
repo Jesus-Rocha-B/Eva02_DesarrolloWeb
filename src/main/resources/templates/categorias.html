@@ -41,6 +41,10 @@
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Estado</th>
+
+                <!-- Cambio 1: NUEVA CABECERA DE COLUMNA ACCIÓN -->
+
+                <th>Acción</th>
             </tr>
             </thead>
             <tbody>
@@ -54,6 +58,17 @@
                           th:text="${categoria.estado}">
                     </span>
                 </td>
+                <!-- Cambio 2: CELDA CON BOTÓN CONMUTADOR (DESACTIVAR/ACTIVAR) -->
+                <td>
+                    <form th:action="@{/web/categorias/{id}/cambiar-estado(id=${categoria.id})}" method="post" style="display:inline;">
+                        <button type="submit"
+                                class="btn btn-sm"
+                                th:classappend="${categoria.estado == 'ACTIVO'} ? 'btn-outline-danger' : 'btn-outline-success'"
+                                th:text="${categoria.estado == 'ACTIVO' ? 'Desactivar' : 'Activar'}">
+                        </button>
+                    </form>
+                </td>
+                <!-- ======================================================= -->
             </tr>
             </tbody>
         </table>

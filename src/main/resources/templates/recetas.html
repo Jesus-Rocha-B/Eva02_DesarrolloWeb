@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bandeja de Recetas · Farmacia</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+
+<div class="d-flex">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <main class="flex-grow-1 p-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="fw-bold text-success-emphasis">Bandeja de Recetas Médicas</h1>
+                <p class="text-muted mb-0">Recepción, validación de stock y dispensación directa por receta.</p>
+            </div>
+            <a th:href="@{/web/recetas/nueva}" class="btn btn-primary fw-bold">
+                <i class="bi bi-plus-circle me-1"></i> Emitir Receta
+            </a>
+        </div>
+
+        <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong th:text="${mensaje}"></strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error: </strong><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>N° Receta</th>
+                        <th>Paciente / Historia</th>
+                        <th>Médico Prescriptor</th>
+                        <th>Prescripción (Medicamento / Posología)</th>
+                        <th class="text-center">Cant.</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Acción</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${recetas}">
+                        <td><code class="fw-bold text-dark" th:text="${r.numeroReceta}"></code></td>
+                        <td>
+                            <div class="fw-bold text-dark" th:text="${r.paciente.nombreCompleto}"></div>
+                            <span class="small text-muted" th:text="'DNI: ' + ${r.paciente.numeroDocumento} + ' | HC: ' + ${r.paciente.numeroHistoria}"></span>
+                        </td>
+                        <td>
+                            <div class="text-dark" th:text="${r.medicoNombre}"></div>
+                            <span class="small text-muted" th:text="${r.medicoColegiatura}"></span>
+                        </td>
+                        <td>
+                            <div th:each="d : ${r.detalles}">
+                                <strong class="text-primary" th:text="${d.medicamento.nombre}"></strong>
+                                <div class="small text-muted" th:text="${d.dosis + ' - ' + d.frecuencia + ' x ' + d.duracion + ' (' + d.viaAdministracion + ')'}"></div>
+                            </div>
+                        </td>
+                        <td class="text-center fw-bold" th:each="d : ${r.detalles}" th:text="${d.cantidad} + ' uds'"></td>
+                        <td class="text-center">
+                            <span class="badge px-2 py-1"
+                                  th:classappend="${r.estado == 'PENDIENTE'} ? 'bg-warning text-dark' : (${r.estado == 'DISPENSADA'} ? 'bg-success' : 'bg-secondary')"
+                                  th:text="${r.estado}">
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <form th:if="${r.estado == 'PENDIENTE'}" th:action="@{/web/recetas/{id}/dispensar(id=${r.id})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-success fw-bold" onclick="return confirm('¿Confirmar dispensación y salida FEFO?');">
+                                    <i class="bi bi-box-seam me-1"></i> Dispensar
+                                </button>
+                            </form>
+                            <span th:if="${r.estado == 'DISPENSADA'}" class="text-success small fw-semibold">
+                                <i class="bi bi-check-circle-fill"></i> Atendido
+                            </span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(recetas)}">
+                        <td colspan="7" class="text-center text-muted py-5">No existen recetas registradas en la bandeja.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

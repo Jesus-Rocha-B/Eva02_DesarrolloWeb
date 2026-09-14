@@ -1,4 +1,6 @@
 package com.tecsup.consultamedica.controller;
+
+import org.springframework.web.bind.annotation.PathVariable;
 import com.tecsup.consultamedica.model.CategoriaMedicamento;
 import com.tecsup.consultamedica.service.CategoriaMedicamentoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,13 @@ public class CategoriaWebController {
         categoria.setNombre(nombre);
         categoria.setDescripcion(descripcion);
         categoriaService.registrar(categoria);
+        return "redirect:/web/categorias";
+    }
+    @PostMapping("/{id}/cambiar-estado")
+    public String alternarEstado(@PathVariable("id") Long id) {
+        CategoriaMedicamento cat = categoriaService.buscarPorId(id);
+        String nuevoEstado = "ACTIVO".equalsIgnoreCase(cat.getEstado()) ? "INACTIVO" : "ACTIVO";
+        categoriaService.cambiarEstado(id, nuevoEstado);
         return "redirect:/web/categorias";
     }
 }

@@ -31,6 +31,12 @@ public class CategoriaMedicamentoService {
         return categoriaRepository.save(existente);
     }
 
+    public CategoriaMedicamento cambiarEstado(Long id, String nuevoEstado) {
+        CategoriaMedicamento categoria = buscarPorId(id);
+        categoria.setEstado(nuevoEstado);
+        return categoriaRepository.save(categoria);
+    }
+
     public void eliminar(Long id) {
         categoriaRepository.deleteById(id);
     }

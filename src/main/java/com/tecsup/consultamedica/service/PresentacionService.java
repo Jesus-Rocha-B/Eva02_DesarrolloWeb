@@ -31,6 +31,12 @@ public class PresentacionService {
         return presentacionRepository.save(existente);
     }
 
+    public Presentacion cambiarEstado(Long id, String nuevoEstado) {
+        Presentacion presentacion = buscarPorId(id);
+        presentacion.setEstado(nuevoEstado);
+        return presentacionRepository.save(presentacion);
+    }
+
     public void eliminar(Long id) {
         presentacionRepository.deleteById(id);
     }

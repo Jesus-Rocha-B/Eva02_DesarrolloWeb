@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventario y Lotes · Farmacia</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div class="d-flex">
+
+    <!-- Barra lateral compartida -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <!-- Contenido principal -->
+    <main class="flex-grow-1 p-5">
+
+        <h1 class="fw-bold text-success-emphasis">Control de Stock y Lotes</h1>
+        <p class="text-muted mb-4">Registro de ingresos de almacén, control de vencimientos y dispensación FEFO.</p>
+
+        <!-- Mensajes flash del servidor -->
+        <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <strong>Operación exitosa:</strong> <span th:text="${mensajeExito}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+        <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <strong>Error de validación:</strong> <span th:text="${mensajeError}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+
+        <!-- Alertas Preventivas (RF-FAR-04) -->
+        <div class="row g-3 mb-4" th:if="${!#lists.isEmpty(lotesPorVencer) or !#lists.isEmpty(medicamentosSinStock)}">
+            <div class="col-md-6" th:if="${!#lists.isEmpty(lotesPorVencer)}">
+                <div class="alert alert-warning border-0 shadow-sm mb-0">
+                    <h6 class="fw-bold mb-2">Lotes Próximos a Vencer (&le; 30 días)</h6>
+                    <ul class="mb-0 small ps-3">
+                        <li th:each="lv : ${lotesPorVencer}">
+                            <strong th:text="${lv.medicamento.nombre}"></strong> - Lote: <span th:text="${lv.codigoLote}"></span>
+                            (Vence: <span th:text="${#temporals.format(lv.fechaVencimiento, 'dd/MM/yyyy')}"></span>,
+                            Saldo: <span th:text="${lv.cantidadActual}"></span> uds)
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-6" th:if="${!#lists.isEmpty(medicamentosSinStock)}">
+                <div class="alert alert-danger border-0 shadow-sm mb-0">
+                    <h6 class="fw-bold mb-2">Medicamentos sin Existencias (Stock 0)</h6>
+                    <ul class="mb-0 small ps-3">
+                        <li th:each="ms : ${medicamentosSinStock}">
+                            <span th:text="${ms.codigo}"></span> - <strong th:text="${ms.nombre}"></strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formularios de Operación -->
+        <div class="row g-4 mb-4">
+
+            <!-- Columna izquierda: Entrada de lote -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white fw-bold text-secondary">
+                        Ingreso de Nuevo Lote (Entrada)
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/web/lotes}" th:object="${nuevoLote}" method="post" class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label">Medicamento</label>
+                                <select th:field="*{medicamento.id}" class="form-select" required>
+                                    <option value="" disabled selected>Seleccione...</option>
+                                    <option th:each="med : ${medicamentos}"
+                                            th:value="${med.id}"
+                                            th:text="${med.nombre}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Código Lote</label>
+                                <input type="text" th:field="*{codigoLote}" class="form-control" placeholder="Ej: LOT-2026-A1" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Cantidad Inicial</label>
+                                <input type="number" th:field="*{cantidadInicial}" class="form-control" min="1" placeholder="Unidades" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">F. Vencimiento</label>
+                                <input type="date" th:field="*{fechaVencimiento}" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Precio Unitario (S/.)</label>
+                                <input type="number" step="0.01" th:field="*{precioUnitario}" class="form-control" placeholder="0.00" required>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-success w-100">Registrar Ingreso</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna derecha: Salida FEFO -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100 border-start border-primary border-4">
+                    <div class="card-header bg-white fw-bold text-primary">
+                        Dispensar Medicamento (Salida FEFO)
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/web/lotes/dispensar}" method="post" class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Medicamento a Despachar</label>
+                                <select name="medicamentoId" class="form-select" required>
+                                    <option value="" disabled selected>Seleccione medicamento...</option>
+                                    <option th:each="med : ${medicamentos}"
+                                            th:value="${med.id}"
+                                            th:text="${med.nombre}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Cantidad Requerida</label>
+                                <input type="number" name="cantidad" class="form-control" min="1" placeholder="Unidades" required>
+                            </div>
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-primary w-100">Ejecutar Salida</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Tabla Única de Existencias Físicas -->
+        <table class="table table-hover bg-white rounded shadow-sm overflow-hidden align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Medicamento</th>
+                <th>Lote</th>
+                <th>Stock Disponible</th>
+                <th>Ingreso Base</th>
+                <th>Vencimiento</th>
+                <th>Precio (S/.)</th>
+                <th>Estado</th>
+                <th>Acción</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="l : ${lotes}">
+                <td th:text="${l.id}"></td>
+                <td class="fw-semibold" th:text="${l.medicamento.nombre}"></td>
+                <td><code class="text-dark" th:text="${l.codigoLote}"></code></td>
+                <td>
+                    <span class="fs-6 fw-bold text-dark" th:text="${l.cantidadActual}"></span>
+                    <span class="text-muted small"> uds</span>
+                </td>
+                <td>
+                    <span class="text-secondary small" th:text="${l.cantidadInicial} + ' uds'"></span>
+                </td>
+                <td th:text="${#temporals.format(l.fechaVencimiento, 'dd/MM/yyyy')}"></td>
+                <td th:text="'S/. ' + ${#numbers.formatDecimal(l.precioUnitario, 1, 'POINT', 2, 'POINT')}"></td>
+                <td>
+                    <span class="badge rounded-pill"
+                          th:classappend="${l.estado == 'DISPONIBLE'} ? 'bg-success' : 'bg-secondary'"
+                          th:text="${l.estado}">
+                    </span>
+                </td>
+                <td>
+                    <div class="d-flex gap-1">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary"
+                                data-bs-toggle="modal"
+                                th:data-bs-target="'#modalAjuste-' + ${l.id}">
+                            Ajustar
+                        </button>
+
+                        <form th:action="@{/web/lotes/{id}/cambiar-estado(id=${l.id})}" method="post" style="display:inline;">
+                            <button type="submit"
+                                    class="btn btn-sm"
+                                    th:classappend="${l.estado == 'DISPONIBLE'} ? 'btn-outline-danger' : 'btn-outline-success'"
+                                    th:text="${l.estado == 'DISPONIBLE' ? 'Agotar' : 'Reactivar'}">
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Modal unificado de Ajuste -->
+                    <div class="modal fade" th:id="'modalAjuste-' + ${l.id}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <form th:action="@{/web/lotes/{id}/ajustar(id=${l.id})}" method="post">
+                                    <div class="modal-header py-2">
+                                        <h6 class="modal-title fw-bold">Ajuste de Stock del Lote</h6>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                    </div>
+                                    <div class="modal-body py-3">
+                                        <div class="p-2 mb-3 bg-light rounded small">
+                                            <div><strong>Medicamento:</strong> <span th:text="${l.medicamento.nombre}"></span></div>
+                                            <div><strong>Lote:</strong> <span th:text="${l.codigoLote}"></span></div>
+                                            <div><strong>Saldo actual:</strong> <span class="badge bg-secondary" th:text="${l.cantidadActual} + ' uds'"></span></div>
+                                            <div><strong>Ingreso base:</strong> <span class="text-muted" th:text="${l.cantidadInicial} + ' uds'"></span></div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Tipo de Operación</label>
+                                            <select name="tipo" class="form-select form-select-sm" required>
+                                                <option value="ENTRADA">Entrada (Aumentar stock / Corrección física)</option>
+                                                <option value="SALIDA">Salida (Disminuir stock / Merma o Retiro)</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold">Cantidad (unidades)</label>
+                                            <input type="number" name="cantidad" class="form-control form-control-sm" min="1" placeholder="Ej: 5" required>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-semibold">Motivo / Justificación</label>
+                                            <select name="motivo" class="form-select form-select-sm" required>
+                                                <option value="REABASTECIMIENTO">Reabastecimiento de almacén</option>
+                                                <option value="MERMA_ROTURA">Merma por rotura / empaque dañado</option>
+                                                <option value="CADUCIDAD_RETIRO">Retiro por caducidad</option>
+                                                <option value="CORRECCION_CONTEO">Ajuste por conteo físico</option>
+                                                <option value="DEVOLUCION_PROVEEDOR">Devolución a proveedor</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer py-2">
+                                        <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-sm btn-primary">Aplicar Ajuste</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(lotes)}">
+                <td colspan="9" class="text-center text-muted py-4">No hay lotes de medicamentos registrados en el almacén.</td>
+            </tr>
+            </tbody>
+        </table>
+
+    </main>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
