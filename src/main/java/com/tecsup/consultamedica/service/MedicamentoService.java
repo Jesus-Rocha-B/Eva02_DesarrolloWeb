@@ -1,4 +1,5 @@
 package com.tecsup.consultamedica.service;
+import com.tecsup.consultamedica.aop.Auditable;
 import com.tecsup.consultamedica.model.Medicamento;
 import com.tecsup.consultamedica.repository.MedicamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ public class MedicamentoService {
     }
 
     // RF FAR 03 y 06
+    @Auditable(operacion = "REGISTRO", entidad = "Medicamento")
     public Medicamento registrar(Medicamento medicamento) {
         medicamentoRepository.findByCodigo(medicamento.getCodigo()).ifPresent(m -> {
             throw new RuntimeException("Ya existe un medicamento con el código " + medicamento.getCodigo());
@@ -30,6 +32,7 @@ public class MedicamentoService {
     }
 
     // RF FAR 04: modificar
+    @Auditable(operacion = "MODIFICACION", entidad = "Medicamento")
     public Medicamento actualizar(Long id, Medicamento datos) {
         Medicamento existente = buscarPorId(id);
         existente.setNombre(datos.getNombre());
@@ -43,6 +46,7 @@ public class MedicamentoService {
     }
 
     // RF FAR 05: activar o desactivar
+    @Auditable(operacion = "DESACTIVACION", entidad = "Medicamento")
     public Medicamento cambiarEstado(Long id, String nuevoEstado) {
         Medicamento existente = buscarPorId(id);
         existente.setEstado(nuevoEstado);
