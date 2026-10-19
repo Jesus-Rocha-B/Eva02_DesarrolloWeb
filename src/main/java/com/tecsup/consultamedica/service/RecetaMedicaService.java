@@ -1,5 +1,6 @@
 package com.tecsup.consultamedica.service;
 
+import com.tecsup.consultamedica.aop.Auditable;
 import com.tecsup.consultamedica.model.DetalleReceta;
 import com.tecsup.consultamedica.model.Paciente;
 import com.tecsup.consultamedica.model.RecetaMedica;
@@ -44,6 +45,7 @@ public class RecetaMedicaService {
     }
 
     @Transactional
+    @Auditable(operacion = "REGISTRO", entidad = "RecetaMedica")
     public RecetaMedica emitirReceta(String dniPaciente, String nombrePaciente, String historiaClinica,
                                      String medicoNombre, String medicoColegiatura, String diagnostico,
                                      Long medicamentoId, String dosis, String frecuencia,
@@ -107,6 +109,7 @@ public class RecetaMedicaService {
     }
 
     @Transactional
+    @Auditable(operacion = "MODIFICACION", entidad = "RecetaMedica")
     public void dispensarReceta(Long recetaId) {
         RecetaMedica receta = buscarPorId(recetaId);
 
