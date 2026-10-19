@@ -7,6 +7,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "medicamento")
@@ -36,6 +39,8 @@ public class Medicamento {
     private boolean requiereReceta;
     @Column(nullable = false, length = 10)
     private String estado;
+    @OneToMany(mappedBy = "medicamento")
+    private List<Lote> lotes = new ArrayList<>();
 
     public Medicamento() {
     }
@@ -100,5 +105,11 @@ public class Medicamento {
     }
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+    public List<Lote> getLotes() {
+        return lotes;
+    }
+    public void setLotes(List<Lote> lotes) {
+        this.lotes = lotes;
     }
 }
