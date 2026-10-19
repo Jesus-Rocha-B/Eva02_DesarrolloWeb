@@ -6,12 +6,20 @@
         <span class="badge rounded-circle bg-white text-success p-2 fs-6">+</span>
         <span class="fs-4 fw-bold">Farmacia</span>
     </div>
+
+    <!-- Navegación General -->
     <nav class="nav nav-pills flex-column gap-1">
+        <small class="text-white-50 text-uppercase fw-semibold px-2 mb-1">Seguridad & Usuarios</small>
+        <a th:href="@{/web/usuarios}" class="nav-link text-white">Usuarios</a>
+        <a th:href="@{/web/roles}" class="nav-link text-white">Roles</a>
+
+        <hr class="border-white opacity-25 my-2">
+
+        <small class="text-white-50 text-uppercase fw-semibold px-2 mb-1">Gestión de Farmacia</small>
         <a th:href="@{/web/categorias}" class="nav-link text-white">Categorías</a>
         <a th:href="@{/web/presentaciones}" class="nav-link text-white">Presentaciones</a>
         <a th:href="@{/web/medicamentos}" class="nav-link text-white">Medicamentos</a>
         <a th:href="@{/web/lotes}" class="nav-link text-white">Stock / Lotes</a>
-        <!-- [NUEVO] Acceso directo al Kardex y auditoría física -->
         <a th:href="@{/web/kardex}" class="nav-link text-white">Kardex / Auditoría</a>
         <a th:href="@{/web/proveedores}" class="nav-link text-white">Proveedores</a>
         <a th:href="@{/web/farmacia/dashboard}" class="nav-link text-white">Dashboard</a>
