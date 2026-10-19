@@ -10,11 +10,11 @@ public class DetalleReceta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "receta_id", nullable = false)
     private RecetaMedica receta;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "medicamento_id", nullable = false)
     private Medicamento medicamento;
 
