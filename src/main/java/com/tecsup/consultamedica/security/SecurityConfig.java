@@ -20,7 +20,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/error").permitAll()
-                .requestMatchers("/web/usuarios/**", "/web/roles/**").hasRole("ADMINISTRADOR")
+                .requestMatchers("/web/usuarios/**", "/web/roles/**", "/web/auditoria/**").hasRole("ADMINISTRADOR")
                 .requestMatchers("/web/recetas/**").hasAnyRole("ADMINISTRADOR", "MEDICO")
                 .requestMatchers("/web/lotes/**", "/web/medicamentos/**", "/web/kardex/**",
                                  "/web/categorias/**", "/web/presentaciones/**", "/web/proveedores/**",

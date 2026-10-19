@@ -1,5 +1,6 @@
 package com.tecsup.consultamedica.service;
 
+import com.tecsup.consultamedica.aop.Auditable;
 import com.tecsup.consultamedica.model.Rol;
 import com.tecsup.consultamedica.model.Usuario;
 import com.tecsup.consultamedica.repository.UsuarioRepository;
@@ -38,6 +39,7 @@ public class UsuarioService {
         return usuarioRepository.findByUsername(username);
     }
 
+    @Auditable(operacion = "REGISTRO", entidad = "Usuario")
     public Usuario registrar(Usuario usuario) {
         if (usuario.getPassword() != null && !usuario.getPassword().isBlank()) {
             usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
@@ -48,6 +50,7 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
+    @Auditable(operacion = "MODIFICACION", entidad = "Usuario")
     public Usuario actualizar(Long id, Usuario datosActualizados, Set<Rol> nuevosRoles) {
         return usuarioRepository.findById(id).map(usuario -> {
             usuario.setNombres(datosActualizados.getNombres());
@@ -66,6 +69,7 @@ public class UsuarioService {
         }).orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
     }
 
+    @Auditable(operacion = "DESACTIVACION", entidad = "Usuario")
     public void cambiarEstado(Long id) {
         usuarioRepository.findById(id).ifPresent(usuario -> {
             if ("ACTIVO".equalsIgnoreCase(usuario.getEstado())) {

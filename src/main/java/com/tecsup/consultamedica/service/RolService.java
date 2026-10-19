@@ -1,5 +1,6 @@
 package com.tecsup.consultamedica.service;
 
+import com.tecsup.consultamedica.aop.Auditable;
 import com.tecsup.consultamedica.model.Rol;
 import com.tecsup.consultamedica.repository.RolRepository;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class RolService {
         return rolRepository.findByNombre(nombre);
     }
 
+    @Auditable(operacion = "REGISTRO", entidad = "Rol")
     public Rol guardar(Rol rol) {
         if (rol.getEstado() == null || rol.getEstado().isBlank()) {
             rol.setEstado("ACTIVO");
@@ -40,6 +42,7 @@ public class RolService {
         return rolRepository.save(rol);
     }
 
+    @Auditable(operacion = "DESACTIVACION", entidad = "Rol")
     public void cambiarEstado(Long id) {
         rolRepository.findById(id).ifPresent(rol -> {
             if ("ACTIVO".equalsIgnoreCase(rol.getEstado())) {
